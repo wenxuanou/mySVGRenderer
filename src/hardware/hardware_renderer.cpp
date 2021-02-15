@@ -250,7 +250,6 @@ void HardwareRenderer::rasterize_point(float x, float y, Color color) {
     if(x < 0 || x >= context_w) return;
     if(y < 0 || y >= context_h) return;
     
-    
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear buffer
     //glPointSize(10.0f); // enlarge the point
     glColor4f(color.r, color.g, color.b, color.a); // set color of point
@@ -268,6 +267,12 @@ void HardwareRenderer::rasterize_line(float x0, float y0,
 
   // Task 1: 
   // Implement line rasterization
+    
+    if(x0 < 0 || x0 >= context_w) return;
+    if(y0 < 0 || y0 >= context_h) return;
+    if(x1 < 0 || x1 >= context_w) return;
+    if(y1 < 0 || y1 >= context_h) return;
+    
     glColor4f(color.r, color.g, color.b, color.a);
     
     glBegin(GL_LINES);
@@ -283,6 +288,14 @@ void HardwareRenderer::rasterize_triangle(float x0, float y0,
                                           Color color) {
   // Task 1: 
   // Implement triangle rasterization
+    
+    if(x0 < 0 || x0 >= context_w) return;
+    if(y0 < 0 || y0 >= context_h) return;
+    if(x1 < 0 || x1 >= context_w) return;
+    if(y1 < 0 || y1 >= context_h) return;
+    if(x2 < 0 || x2 >= context_w) return;
+    if(y2 < 0 || y2 >= context_h) return;
+    
     glColor4f(color.r, color.g, color.b, color.a);
     
     glBegin(GL_TRIANGLES);
