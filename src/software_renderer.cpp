@@ -244,6 +244,138 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
 
   // Task 2: 
   // Implement line rasterization
+    
+    // round to integer
+    int sx0 = (int) floor(x0);
+    int sy0 = (int) floor(y0);
+    int sx1 = (int) floor(x1);
+    int sy1 = (int) floor(y1);
+    
+    // check bounds
+    if ( sx0 < 0 || sx0 >= target_w ) return;
+    if ( sy0 < 0 || sy0 >= target_h ) return;
+    if ( sx1 < 0 || sx1 >= target_w ) return;
+    if ( sy1 < 0 || sy1 >= target_h ) return;
+    
+    // Bresenham algorithm
+    int dx = sx1 - sx0;
+    int dy = sy1 - sy0;
+    
+    // vertical or horizontal
+    if(dx == 0){
+        // vertical
+        int x = sx0;
+        for(int y = sy0; y != sy1; y += dy/abs(dy)){
+            render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
+            render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
+            render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
+            render_target[4 * (x + y * target_w) + 3] = (uint8_t) (color.a * 255);
+        }
+        return;
+    }else if(dy == 0){
+        // horizontal
+        int y = sy0;
+        for(int x = sx0; x != sx1; x += dx/abs(dx)){
+            render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
+            render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
+            render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
+            render_target[4 * (x + y * target_w) + 3] = (uint8_t) (color.a * 255);
+        }
+        return;
+    }
+    
+    // nonzero and finite slope
+    if(dy*dx > 0){
+        // positive slope
+        if(sy1<sy0 && sx1<sx0){
+            // make (sx1,sy1) always bigger
+            int tempY = sy1;
+            sy1 = sy0;
+            sy0 = tempY;
+            int tempX = sx1;
+            sx1 = sx0;
+            sx0 = tempX;
+        }
+        if(abs(dy) <= abs(dx)){
+            // slope < 0.5
+            int y = sy0;
+            int eps = 0;
+            for ( int x = sx0; x <= sx1; x++ )  {
+                render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
+                render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
+                render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
+                render_target[4 * (x + y * target_w) + 3] = (uint8_t) (color.a * 255);
+                eps += abs(dy);
+
+                if (2*eps >= abs(dx))  {
+                    y++;
+                    eps -= abs(dx);
+                }
+            }
+        }else{
+            // slope > 0.5
+            int x = sx0;
+            int eps = 0;
+            for ( int y = sy0; y <= sy1; y++ )  {
+                render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
+                render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
+                render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
+                render_target[4 * (x + y * target_w) + 3] = (uint8_t) (color.a * 255);
+                eps += abs(dx);
+
+                if (2*eps >= abs(dy))  {
+                    x++;
+                    eps -= abs(dy);
+                }
+            }
+        }
+    }else{
+        // negative slope
+        if(sy1>sy0 && sx1<sx0){
+            // make sy0<sy1, sx0>sx1
+            int tempY = sy1;
+            sy1 = sy0;
+            sy0 = tempY;
+            int tempX = sx1;
+            sx1 = sx0;
+            sx0 = tempX;
+        }
+        if(abs(dy) < abs(dx)){
+            // slope > -0.5
+            int y = sy0;
+            int eps = 0;
+            for ( int x = sx0; x <= sx1; x++ )  {
+                render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
+                render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
+                render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
+                render_target[4 * (x + y * target_w) + 3] = (uint8_t) (color.a * 255);
+                eps += abs(dy);
+
+                if (2*eps >= abs(dx))  {
+                    y--;
+                    eps -= abs(dx);
+                }
+            }
+        }else{
+            // slope < -0.5
+            int x = sx0;
+            int eps = 0;
+            for ( int y = sy0; y >= sy1; y-- )  {
+                render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
+                render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
+                render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
+                render_target[4 * (x + y * target_w) + 3] = (uint8_t) (color.a * 255);
+                eps += abs(dx);
+
+                if (2*eps >= abs(dy))  {
+                    x++;
+                    eps -= abs(dy);
+                }
+            }
+        }
+        
+    }
+    return;
 }
 
 void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
