@@ -384,6 +384,9 @@ void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
                                               Color color ) {
   // Task 3: 
   // Implement triangle rasterization
+    
+    
+    
 
 }
 
