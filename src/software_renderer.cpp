@@ -385,6 +385,21 @@ void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
   // Task 3: 
   // Implement triangle rasterization
     
+    // round to integer
+    int sx0 = (int) floor(x0);
+    int sy0 = (int) floor(y0);
+    int sx1 = (int) floor(x1);
+    int sy1 = (int) floor(y1);
+    int sx2 = (int) floor(x2);
+    int sy2 = (int) floor(y2);
+    
+    // check bounds
+    if ( sx0 < 0 || sx0 >= target_w ) return;
+    if ( sy0 < 0 || sy0 >= target_h ) return;
+    if ( sx1 < 0 || sx1 >= target_w ) return;
+    if ( sy1 < 0 || sy1 >= target_h ) return;
+    if ( sx2 < 0 || sx2 >= target_w ) return;
+    if ( sy2 < 0 || sy2 >= target_h ) return;
     
     
 
