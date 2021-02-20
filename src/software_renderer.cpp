@@ -401,8 +401,34 @@ void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
     if ( sx2 < 0 || sx2 >= target_w ) return;
     if ( sy2 < 0 || sy2 >= target_h ) return;
     
+    int xMax = max(sx0,max(sx1,sx2));
+    int xMin = min(sx0,min(sx1,sx2));
+    int yMax = max(sy0,max(sy1,sy2));
+    int yMin = min(sy0,min(sy1,sy2));
     
-
+    // edge as vector
+    int v01_x = sx1 - sx0, v01_y = sy1 - sy0;
+    int v12_x = sx2 - sx1, v12_y = sy2 - sy1;
+    int v20_x = sx0 - sx2, v20_y = sy0 - sy2;
+    
+    
+    for(int y = yMin; y < yMax; y++){
+        for(int x = xMin; x < xMax; x++){
+            // cross product
+            int cross01 = ((x - sx0) * v01_y) - ((y - sy0) * v01_x);
+            int cross12 = ((x - sx1) * v12_y) - ((y - sy1) * v12_x);
+            int cross20 = ((x - sx2) * v20_y) - ((y - sy2) * v20_x);
+                        
+            if(cross01*cross12>0 && cross01*cross20>0){
+                render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
+                render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
+                render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
+                render_target[4 * (x + y * target_w) + 3] = (uint8_t) (color.a * 255);
+            }
+        }
+    }
+    
+    
 }
 
 void SoftwareRendererImp::rasterize_image( float x0, float y0,
