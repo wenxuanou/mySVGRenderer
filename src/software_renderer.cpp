@@ -385,47 +385,33 @@ void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
   // Task 3: 
   // Implement triangle rasterization
     
-    // round to integer
-    /*
-    int sx0 = (int) floor(x0);
-    int sy0 = (int) floor(y0);
-    int sx1 = (int) floor(x1);
-    int sy1 = (int) floor(y1);
-    int sx2 = (int) floor(x2);
-    int sy2 = (int) floor(y2);
-    */
-    
-    float sx0 = x0, sy0 = y0;
-    float sx1 = x1, sy1 = y1;
-    float sx2 = x2, sy2 = y2;
-    
     // check bounds
-    if ( sx0 < 0 || sx0 >= target_w ) return;
-    if ( sy0 < 0 || sy0 >= target_h ) return;
-    if ( sx1 < 0 || sx1 >= target_w ) return;
-    if ( sy1 < 0 || sy1 >= target_h ) return;
-    if ( sx2 < 0 || sx2 >= target_w ) return;
-    if ( sy2 < 0 || sy2 >= target_h ) return;
+    if ( x0 < 0 || x0 >= target_w ) return;
+    if ( y0 < 0 || y0 >= target_h ) return;
+    if ( x1 < 0 || x1 >= target_w ) return;
+    if ( y1 < 0 || y1 >= target_h ) return;
+    if ( x2 < 0 || x2 >= target_w ) return;
+    if ( y2 < 0 || y2 >= target_h ) return;
      
-    int xMax = max(sx0,max(sx1,sx2));
-    int xMin = min(sx0,min(sx1,sx2));
-    int yMax = max(sy0,max(sy1,sy2));
-    int yMin = min(sy0,min(sy1,sy2));
+    int xMax = max(x0,max(x1,x2));
+    int xMin = min(x0,min(x1,x2));
+    int yMax = max(y0,max(y1,y2));
+    int yMin = min(y0,min(y1,y2));
     
     // edge as vector
     
-    Vector2D v01(sx1 - sx0, sy1 - sy0); // vector: 0->1
-    Vector2D v12(sx2 - sx1, sy2 - sy1);
-    Vector2D v20(sx0 - sx2, sy0 - sy2);
+    Vector2D v01(x1 - x0, y1 - y0); // vector: 0->1
+    Vector2D v12(x2 - x1, y2 - y1);
+    Vector2D v20(x0 - x2, y0 - y2);
     
     
     for(int y = yMin; y <= yMax; y++){
         for(int x = xMin; x <= xMax; x++){
             // cross product
             
-            Vector2D v0p(x - sx0, y - sy0); // vector 0->p
-            Vector2D v1p(x - sx1, y - sy1);
-            Vector2D v2p(x - sx2, y - sy2);
+            Vector2D v0p(x - x0, y - y0); // vector 0->p
+            Vector2D v1p(x - x1, y - y1);
+            Vector2D v2p(x - x2, y - y2);
             
             double cross0 = cross(v0p, v01);
             double cross1 = cross(v1p, v12);
