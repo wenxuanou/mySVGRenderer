@@ -386,12 +386,18 @@ void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
   // Implement triangle rasterization
     
     // round to integer
+    /*
     int sx0 = (int) floor(x0);
     int sy0 = (int) floor(y0);
     int sx1 = (int) floor(x1);
     int sy1 = (int) floor(y1);
     int sx2 = (int) floor(x2);
     int sy2 = (int) floor(y2);
+    */
+    
+    float sx0 = x0, sy0 = y0;
+    float sx1 = x1, sy1 = y1;
+    float sx2 = x2, sy2 = y2;
     
     // check bounds
     if ( sx0 < 0 || sx0 >= target_w ) return;
@@ -400,26 +406,32 @@ void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
     if ( sy1 < 0 || sy1 >= target_h ) return;
     if ( sx2 < 0 || sx2 >= target_w ) return;
     if ( sy2 < 0 || sy2 >= target_h ) return;
-    
+     
     int xMax = max(sx0,max(sx1,sx2));
     int xMin = min(sx0,min(sx1,sx2));
     int yMax = max(sy0,max(sy1,sy2));
     int yMin = min(sy0,min(sy1,sy2));
     
     // edge as vector
-    int v01_x = sx1 - sx0, v01_y = sy1 - sy0;
-    int v12_x = sx2 - sx1, v12_y = sy2 - sy1;
-    int v20_x = sx0 - sx2, v20_y = sy0 - sy2;
+    
+    Vector2D v01(sx1 - sx0, sy1 - sy0); // vector: 0->1
+    Vector2D v12(sx2 - sx1, sy2 - sy1);
+    Vector2D v20(sx0 - sx2, sy0 - sy2);
     
     
-    for(int y = yMin; y < yMax; y++){
-        for(int x = xMin; x < xMax; x++){
+    for(int y = yMin; y <= yMax; y++){
+        for(int x = xMin; x <= xMax; x++){
             // cross product
-            int cross01 = ((x - sx0) * v01_y) - ((y - sy0) * v01_x);
-            int cross12 = ((x - sx1) * v12_y) - ((y - sy1) * v12_x);
-            int cross20 = ((x - sx2) * v20_y) - ((y - sy2) * v20_x);
-                        
-            if(cross01*cross12>0 && cross01*cross20>0){
+            
+            Vector2D v0p(x - sx0, y - sy0); // vector 0->p
+            Vector2D v1p(x - sx1, y - sy1);
+            Vector2D v2p(x - sx2, y - sy2);
+            
+            double cross0 = cross(v0p, v01);
+            double cross1 = cross(v1p, v12);
+            double cross2 = cross(v2p, v20);
+            
+            if(cross0*cross1>0 && cross0*cross2>0){
                 render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
                 render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
                 render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
