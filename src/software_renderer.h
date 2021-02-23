@@ -133,6 +133,9 @@ class SoftwareRendererImp : public SoftwareRenderer {
   // resolve samples to render target
   void resolve( void );
 
+  // supersampling buffer
+  std::vector<unsigned char> sample_buffer; int buff_w; int buff_h;
+    
 }; // class SoftwareRendererImp
 
 

@@ -14,23 +14,23 @@ Task 3:
 
 Task 4:
 
-    Fully implemented.
+    Implemented for triangles and points. Not quite support lines. 
 
 Task 5:
 
-    Fully implemented.
+    Not implemented.
 
 Task 6:
 
-    Fully implemented.
+    Not implemented.
 
 Task 7:
 
-    Fully implemented.
+    Not implemented.
 
 Task 8:
 
-    Fully implemented.
+    Not implemented.
 
 Extra credit:
 

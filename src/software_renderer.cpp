@@ -45,7 +45,13 @@ void SoftwareRendererImp::set_sample_rate( size_t sample_rate ) {
   // Task 4: 
   // You may want to modify this for supersampling support
   this->sample_rate = sample_rate;
-
+  
+    
+    // update sampling buffer size
+    buff_w = target_w * sample_rate;
+    buff_h = target_h * sample_rate;
+    sample_buffer = std::vector<unsigned char>(buff_w * buff_h * 4,255);
+    
 }
 
 void SoftwareRendererImp::set_render_target( unsigned char* render_target,
@@ -57,6 +63,11 @@ void SoftwareRendererImp::set_render_target( unsigned char* render_target,
   this->target_w = width;
   this->target_h = height;
 
+    // update smpling buffer size
+    sample_buffer.clear();
+    buff_w = target_w * sample_rate;
+    buff_h = target_h * sample_rate;
+    sample_buffer = std::vector<unsigned char>(buff_w * buff_h * 4,255);
 }
 
 void SoftwareRendererImp::draw_element( SVGElement* element ) {
@@ -223,18 +234,23 @@ void SoftwareRendererImp::draw_group( Group& group ) {
 void SoftwareRendererImp::rasterize_point( float x, float y, Color color ) {
 
   // fill in the nearest pixel
-  int sx = (int) floor(x);
-  int sy = (int) floor(y);
+  int sx = (int) floor(x * sample_rate);
+  int sy = (int) floor(y * sample_rate);
 
   // check bounds
-  if ( sx < 0 || sx >= target_w ) return;
-  if ( sy < 0 || sy >= target_h ) return;
+  if ( sx < 0 || sx >= buff_w ) return;
+  if ( sy < 0 || sy >= buff_h ) return;
 
   // fill sample - NOT doing alpha blending!
-  render_target[4 * (sx + sy * target_w)    ] = (uint8_t) (color.r * 255);
-  render_target[4 * (sx + sy * target_w) + 1] = (uint8_t) (color.g * 255);
-  render_target[4 * (sx + sy * target_w) + 2] = (uint8_t) (color.b * 255);
-  render_target[4 * (sx + sy * target_w) + 3] = (uint8_t) (color.a * 255);
+    for(size_t i=0; i<sample_rate; i++){
+        for(size_t j=0; j<sample_rate; j++){
+            sample_buffer[4 * ((sx+i) + (sy+j) * buff_w)    ] = (uint8_t) (color.r * 255);
+            sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 1] = (uint8_t) (color.g * 255);
+            sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 2] = (uint8_t) (color.b * 255);
+            sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 3] = (uint8_t) (color.a * 255);
+        }
+    }
+    
 
 }
 
@@ -246,16 +262,16 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
   // Implement line rasterization
     
     // round to integer
-    int sx0 = (int) floor(x0);
-    int sy0 = (int) floor(y0);
-    int sx1 = (int) floor(x1);
-    int sy1 = (int) floor(y1);
+    int sx0 = (int) floor(x0 * sample_rate);
+    int sy0 = (int) floor(y0 * sample_rate);
+    int sx1 = (int) floor(x1 * sample_rate);
+    int sy1 = (int) floor(y1 * sample_rate);
     
     // check bounds
-    if ( sx0 < 0 || sx0 >= target_w ) return;
-    if ( sy0 < 0 || sy0 >= target_h ) return;
-    if ( sx1 < 0 || sx1 >= target_w ) return;
-    if ( sy1 < 0 || sy1 >= target_h ) return;
+    if ( sx0 < 0 || sx0 >= buff_w ) return;
+    if ( sy0 < 0 || sy0 >= buff_h ) return;
+    if ( sx1 < 0 || sx1 >= buff_w ) return;
+    if ( sy1 < 0 || sy1 >= buff_h ) return;
     
     // Bresenham algorithm
     int dx = sx1 - sx0;
@@ -266,20 +282,20 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
         // vertical
         int x = sx0;
         for(int y = sy0; y != sy1; y += dy/abs(dy)){
-            render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
-            render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
-            render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
-            render_target[4 * (x + y * target_w) + 3] = (uint8_t) (color.a * 255);
+            sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (color.r * 255);
+            sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (color.g * 255);
+            sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (color.b * 255);
+            sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (color.a * 255);
         }
         return;
     }else if(dy == 0){
         // horizontal
         int y = sy0;
         for(int x = sx0; x != sx1; x += dx/abs(dx)){
-            render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
-            render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
-            render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
-            render_target[4 * (x + y * target_w) + 3] = (uint8_t) (color.a * 255);
+            sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (color.r * 255);
+            sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (color.g * 255);
+            sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (color.b * 255);
+            sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (color.a * 255);
         }
         return;
     }
@@ -301,10 +317,10 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
             int y = sy0;
             int eps = 0;
             for ( int x = sx0; x <= sx1; x++ )  {
-                render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
-                render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
-                render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
-                render_target[4 * (x + y * target_w) + 3] = (uint8_t) (color.a * 255);
+                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (color.r * 255);
+                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (color.g * 255);
+                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (color.b * 255);
+                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (color.a * 255);
                 eps += abs(dy);
 
                 if (2*eps >= abs(dx))  {
@@ -317,10 +333,10 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
             int x = sx0;
             int eps = 0;
             for ( int y = sy0; y <= sy1; y++ )  {
-                render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
-                render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
-                render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
-                render_target[4 * (x + y * target_w) + 3] = (uint8_t) (color.a * 255);
+                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (color.r * 255);
+                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (color.g * 255);
+                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (color.b * 255);
+                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (color.a * 255);
                 eps += abs(dx);
 
                 if (2*eps >= abs(dy))  {
@@ -345,10 +361,10 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
             int y = sy0;
             int eps = 0;
             for ( int x = sx0; x <= sx1; x++ )  {
-                render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
-                render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
-                render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
-                render_target[4 * (x + y * target_w) + 3] = (uint8_t) (color.a * 255);
+                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (color.r * 255);
+                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (color.g * 255);
+                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (color.b * 255);
+                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (color.a * 255);
                 eps += abs(dy);
 
                 if (2*eps >= abs(dx))  {
@@ -361,10 +377,10 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
             int x = sx0;
             int eps = 0;
             for ( int y = sy0; y >= sy1; y-- )  {
-                render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
-                render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
-                render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
-                render_target[4 * (x + y * target_w) + 3] = (uint8_t) (color.a * 255);
+                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (color.r * 255);
+                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (color.g * 255);
+                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (color.b * 255);
+                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (color.a * 255);
                 eps += abs(dx);
 
                 if (2*eps >= abs(dy))  {
@@ -385,13 +401,18 @@ void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
   // Task 3: 
   // Implement triangle rasterization
     
+    // scale up by sampling rate
+    x0 *= sample_rate; y0 *= sample_rate;
+    x1 *= sample_rate; y1 *= sample_rate;
+    x2 *= sample_rate; y2 *= sample_rate;
+        
     // check bounds
-    if ( x0 < 0 || x0 >= target_w ) return;
-    if ( y0 < 0 || y0 >= target_h ) return;
-    if ( x1 < 0 || x1 >= target_w ) return;
-    if ( y1 < 0 || y1 >= target_h ) return;
-    if ( x2 < 0 || x2 >= target_w ) return;
-    if ( y2 < 0 || y2 >= target_h ) return;
+    if ( x0 < 0 || x0 >= buff_w ) return;
+    if ( y0 < 0 || y0 >= buff_h ) return;
+    if ( x1 < 0 || x1 >= buff_w ) return;
+    if ( y1 < 0 || y1 >= buff_h ) return;
+    if ( x2 < 0 || x2 >= buff_w ) return;
+    if ( y2 < 0 || y2 >= buff_h ) return;
      
     int xMax = max(x0,max(x1,x2));
     int xMin = min(x0,min(x1,x2));
@@ -418,10 +439,10 @@ void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
             double cross2 = cross(v2p, v20);
             
             if(cross0*cross1>0 && cross0*cross2>0){
-                render_target[4 * (x + y * target_w)    ] = (uint8_t) (color.r * 255);
-                render_target[4 * (x + y * target_w) + 1] = (uint8_t) (color.g * 255);
-                render_target[4 * (x + y * target_w) + 2] = (uint8_t) (color.b * 255);
-                render_target[4 * (x + y * target_w) + 3] = (uint8_t) (color.a * 255);
+                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (color.r * 255);
+                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (color.g * 255);
+                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (color.b * 255);
+                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (color.a * 255);
             }
         }
     }
@@ -443,7 +464,37 @@ void SoftwareRendererImp::resolve( void ) {
   // Task 4: 
   // Implement supersampling
   // You may also need to modify other functions marked with "Task 4".
-  return;
+      
+    int block_size = sample_rate * sample_rate;
+    
+    for(size_t y=0; y<target_h; y++){
+        for(size_t x=0; x<target_w; x++){
+            // box filter
+            int avgR(0), avgG(0), avgB(0);
+            for(int yy=0; yy<sample_rate; yy++){
+                for(int xx=0; xx<sample_rate; xx++){
+                    avgR += sample_buffer[4 * ((x*sample_rate+xx) + (y*sample_rate+yy) * buff_w)    ];
+                    avgG += sample_buffer[4 * ((x*sample_rate+xx) + (y*sample_rate+yy) * buff_w) + 1];
+                    avgB += sample_buffer[4 * ((x*sample_rate+xx) + (y*sample_rate+yy) * buff_w) + 2];
+                    
+                }
+            }
+            
+            int originVal = (render_target[4 * (x + y * target_w)    ]
+                            + render_target[4 * (x + y * target_w) + 1]
+                            + render_target[4 * (x + y * target_w) + 2]) / 3;
+            
+                render_target[4 * (x + y * target_w)    ] = avgR / block_size;
+                render_target[4 * (x + y * target_w) + 1] = avgG / block_size;
+                render_target[4 * (x + y * target_w) + 2] = avgB / block_size;
+                render_target[4 * (x + y * target_w) + 3] = 255;
+        }
+    }
+    
+    // clean buffer
+    sample_buffer = std::vector<unsigned char>(buff_w * buff_h * 4,255);
+    
+    return;
 
 }
 
