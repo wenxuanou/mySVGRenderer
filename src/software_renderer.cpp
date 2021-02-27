@@ -276,10 +276,14 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
     int sy1 = (int) floor(y1 * sample_rate);
     
     // check bounds
-    if ( sx0 < 0 || sx0 >= buff_w ) return;
-    if ( sy0 < 0 || sy0 >= buff_h ) return;
-    if ( sx1 < 0 || sx1 >= buff_w ) return;
-    if ( sy1 < 0 || sy1 >= buff_h ) return;
+    
+    if((sx0 < 0 || sx0 >= buff_w)&&(sx1 < 0 || sx1 >= buff_w)){return;}
+    if((sy0 < 0 || sy0 >= buff_h)&&(sy1 < 0 || sy1 >= buff_h)){return;}
+    
+    sx0 = max(0,min(sx0,buff_w-1));
+    sy0 = max(0,min(sy0,buff_h-1));
+    sx1 = max(0,min(sx1,buff_w-1));
+    sy1 = max(0,min(sy1,buff_h-1));
     
     // Bresenham algorithm
     int dx = sx1 - sx0;
@@ -415,13 +419,13 @@ void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
     x2 *= sample_rate; y2 *= sample_rate;
         
     // check bounds
-    if ( x0 < 0 || x0 >= buff_w ) return;
-    if ( y0 < 0 || y0 >= buff_h ) return;
-    if ( x1 < 0 || x1 >= buff_w ) return;
-    if ( y1 < 0 || y1 >= buff_h ) return;
-    if ( x2 < 0 || x2 >= buff_w ) return;
-    if ( y2 < 0 || y2 >= buff_h ) return;
-     
+    x0 = max(0.0f,min(x0,(float)buff_w-1));
+    y0 = max(0.0f,min(y0,(float)buff_h-1));
+    x1 = max(0.0f,min(x1,(float)buff_w-1));
+    y1 = max(0.0f,min(y1,(float)buff_h-1));
+    x2 = max(0.0f,min(x2,(float)buff_w-1));
+    y2 = max(0.0f,min(y2,(float)buff_h-1));
+    
     int xMax = max(x0,max(x1,x2));
     int xMin = min(x0,min(x1,x2));
     int yMax = max(y0,max(y1,y2));
