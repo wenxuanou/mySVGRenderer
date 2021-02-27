@@ -71,10 +71,16 @@ void SoftwareRendererImp::set_render_target( unsigned char* render_target,
 }
 
 void SoftwareRendererImp::draw_element( SVGElement* element ) {
-
+  
+  
   // Task 5 (part 1):
   // Modify this to implement the transformation stack
-
+    
+    //TODO: Task 5
+    // apply child transform
+    Matrix3x3 childTransform = element->transform;
+    transformation =  transformation * childTransform;
+    
   switch(element->type) {
     case POINT:
       draw_point(static_cast<Point&>(*element));
@@ -104,6 +110,8 @@ void SoftwareRendererImp::draw_element( SVGElement* element ) {
       break;
   }
 
+    // transform back to top level
+    transformation = transformation * childTransform.inv();
 }
 
 
