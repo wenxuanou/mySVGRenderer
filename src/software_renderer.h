@@ -75,6 +75,7 @@ class SoftwareRendererImp : public SoftwareRenderer {
   void set_sample_rate( size_t sample_rate );
   
   // set render target
+  // initialize sample buffer to 255
   void set_render_target( unsigned char* target_buffer,
                           size_t width, size_t height );
 
