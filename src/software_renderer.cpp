@@ -318,21 +318,29 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
             
             // apply alpha blending
             // premultiply
-            float p_preR = color.r * color.a;
-            float p_preG = color.g * color.a;
-            float p_preB = color.b * color.a;
-            float buff_preR = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
+            float Er = color.r * color.a;
+            float Eg = color.g * color.a;
+            float Eb = color.b * color.a;
+            float Cr = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
                                 * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-            float buff_preG = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
+            float Cg = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
                                 * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-            float buff_preB = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
+            float Cb = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
                                 * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-            float out_A = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+            // composite alpha
+//                float Ca_out = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+            float Ca_out;
+            if(sample_buffer[4 * (x + y * buff_w) + 3] < 255){
+                Ca_out = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+            }else{
+                Ca_out = 1 - (1 - color.a);
+            }
+
             // retrieve actual rgb values
-            sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (((1 - color.a) * buff_preR + p_preR) / out_A * 255);
-            sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (((1 - color.a) * buff_preG + p_preG) / out_A * 255);
-            sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (((1 - color.a) * buff_preB + p_preB) / out_A * 255);
-            sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (out_A * 255);
+            sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (((1 - color.a) * Cr + Er) / Ca_out * 255);
+            sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (((1 - color.a) * Cg + Eg) / Ca_out * 255);
+            sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (((1 - color.a) * Cb + Eb) / Ca_out * 255);
+            sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (Ca_out * 255);
             
         }
         return;
@@ -347,21 +355,29 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
             
             // apply alpha blending
             // premultiply
-            float p_preR = color.r * color.a;
-            float p_preG = color.g * color.a;
-            float p_preB = color.b * color.a;
-            float buff_preR = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
+            float Er = color.r * color.a;
+            float Eg = color.g * color.a;
+            float Eb = color.b * color.a;
+            float Cr = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
                                 * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-            float buff_preG = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
+            float Cg = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
                                 * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-            float buff_preB = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
+            float Cb = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
                                 * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-            float out_A = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+            // composite alpha
+//                float Ca_out = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+            float Ca_out;
+            if(sample_buffer[4 * (x + y * buff_w) + 3] < 255){
+                Ca_out = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+            }else{
+                Ca_out = 1 - (1 - color.a);
+            }
+
             // retrieve actual rgb values
-            sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (((1 - color.a) * buff_preR + p_preR) / out_A * 255);
-            sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (((1 - color.a) * buff_preG + p_preG) / out_A * 255);
-            sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (((1 - color.a) * buff_preB + p_preB) / out_A * 255);
-            sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (out_A * 255);
+            sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (((1 - color.a) * Cr + Er) / Ca_out * 255);
+            sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (((1 - color.a) * Cg + Eg) / Ca_out * 255);
+            sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (((1 - color.a) * Cb + Eb) / Ca_out * 255);
+            sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (Ca_out * 255);
             
         }
         return;
@@ -391,21 +407,29 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
                 
                 // apply alpha blending
                 // premultiply
-                float p_preR = color.r * color.a;
-                float p_preG = color.g * color.a;
-                float p_preB = color.b * color.a;
-                float buff_preR = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
+                float Er = color.r * color.a;
+                float Eg = color.g * color.a;
+                float Eb = color.b * color.a;
+                float Cr = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float buff_preG = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
+                float Cg = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float buff_preB = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
+                float Cb = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float out_A = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+                // composite alpha
+//                float Ca_out = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+                float Ca_out;
+                if(sample_buffer[4 * (x + y * buff_w) + 3] < 255){
+                    Ca_out = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+                }else{
+                    Ca_out = 1 - (1 - color.a);
+                }
+
                 // retrieve actual rgb values
-                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (((1 - color.a) * buff_preR + p_preR) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (((1 - color.a) * buff_preG + p_preG) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (((1 - color.a) * buff_preB + p_preB) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (out_A * 255);
+                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (((1 - color.a) * Cr + Er) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (((1 - color.a) * Cg + Eg) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (((1 - color.a) * Cb + Eb) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (Ca_out * 255);
                 
                 eps += abs(dy);
 
@@ -426,21 +450,29 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
                 
                 // apply alpha blending
                 // premultiply
-                float p_preR = color.r * color.a;
-                float p_preG = color.g * color.a;
-                float p_preB = color.b * color.a;
-                float buff_preR = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
+                float Er = color.r * color.a;
+                float Eg = color.g * color.a;
+                float Eb = color.b * color.a;
+                float Cr = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float buff_preG = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
+                float Cg = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float buff_preB = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
+                float Cb = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float out_A = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+                // composite alpha
+//                float Ca_out = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+                float Ca_out;
+                if(sample_buffer[4 * (x + y * buff_w) + 3] < 255){
+                    Ca_out = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+                }else{
+                    Ca_out = 1 - (1 - color.a);
+                }
+
                 // retrieve actual rgb values
-                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (((1 - color.a) * buff_preR + p_preR) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (((1 - color.a) * buff_preG + p_preG) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (((1 - color.a) * buff_preB + p_preB) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (out_A * 255);
+                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (((1 - color.a) * Cr + Er) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (((1 - color.a) * Cg + Eg) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (((1 - color.a) * Cb + Eb) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (Ca_out * 255);
                 
                 eps += abs(dx);
 
@@ -473,21 +505,29 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
                 
                 // apply alpha blending
                 // premultiply
-                float p_preR = color.r * color.a;
-                float p_preG = color.g * color.a;
-                float p_preB = color.b * color.a;
-                float buff_preR = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
+                float Er = color.r * color.a;
+                float Eg = color.g * color.a;
+                float Eb = color.b * color.a;
+                float Cr = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float buff_preG = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
+                float Cg = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float buff_preB = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
+                float Cb = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float out_A = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+                // composite alpha
+//                float Ca_out = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+                float Ca_out;
+                if(sample_buffer[4 * (x + y * buff_w) + 3] < 255){
+                    Ca_out = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+                }else{
+                    Ca_out = 1 - (1 - color.a);
+                }
+
                 // retrieve actual rgb values
-                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (((1 - color.a) * buff_preR + p_preR) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (((1 - color.a) * buff_preG + p_preG) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (((1 - color.a) * buff_preB + p_preB) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (out_A * 255);
+                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (((1 - color.a) * Cr + Er) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (((1 - color.a) * Cg + Eg) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (((1 - color.a) * Cb + Eb) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (Ca_out * 255);
                 
                 eps += abs(dy);
 
@@ -508,21 +548,29 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
                 
                 // apply alpha blending
                 // premultiply
-                float p_preR = color.r * color.a;
-                float p_preG = color.g * color.a;
-                float p_preB = color.b * color.a;
-                float buff_preR = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
+                float Er = color.r * color.a;
+                float Eg = color.g * color.a;
+                float Eb = color.b * color.a;
+                float Cr = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float buff_preG = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
+                float Cg = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float buff_preB = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
+                float Cb = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float out_A = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+                // composite alpha
+//                float Ca_out = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+                float Ca_out;
+                if(sample_buffer[4 * (x + y * buff_w) + 3] < 255){
+                    Ca_out = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+                }else{
+                    Ca_out = 1 - (1 - color.a);
+                }
+
                 // retrieve actual rgb values
-                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (((1 - color.a) * buff_preR + p_preR) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (((1 - color.a) * buff_preG + p_preG) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (((1 - color.a) * buff_preB + p_preB) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (out_A * 255);
+                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (((1 - color.a) * Cr + Er) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (((1 - color.a) * Cg + Eg) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (((1 - color.a) * Cb + Eb) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (Ca_out * 255);
                 
                 eps += abs(dx);
 
@@ -568,6 +616,7 @@ void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
     Vector2D v12(x2 - x1, y2 - y1);
     Vector2D v20(x0 - x2, y0 - y2);
     
+//    cout << "here###################" << endl;
     
     for(int y = yMin; y <= yMax; y++){
         for(int x = xMin; x <= xMax; x++){
@@ -589,21 +638,35 @@ void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
                 
                 // apply alpha blending
                 // premultiply
-                float p_preR = color.r * color.a;
-                float p_preG = color.g * color.a;
-                float p_preB = color.b * color.a;
-                float buff_preR = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
+                float Er = color.r * color.a;
+                float Eg = color.g * color.a;
+                float Eb = color.b * color.a;
+                float Cr = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float buff_preG = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
+                float Cg = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float buff_preB = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
+                float Cb = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
                                     * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
-                float out_A = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+                // composite alpha
+                float Ca_out = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+//                float Ca_out = color.a + (1 - color.a) * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+//                float Ca_out;
+//                if(sample_buffer[4 * (x + y * buff_w) + 3] < 255){
+//                    Ca_out = 1 - (1 - color.a) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+//                }else{
+//                    Ca_out = color.a;
+//                }
+
                 // retrieve actual rgb values
-                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (((1 - color.a) * buff_preR + p_preR) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (((1 - color.a) * buff_preG + p_preG) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (((1 - color.a) * buff_preB + p_preB) / out_A * 255);
-                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (out_A * 255);
+                sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (((1 - color.a) * Cr + Er) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (((1 - color.a) * Cg + Eg) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (((1 - color.a) * Cb + Eb) / Ca_out * 255);
+                sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (Ca_out * 255);
+                
+                
+//                cout << "element: " << color.a << " canvas: " << sample_buffer[4 * (x + y * buff_w) + 3] / 255
+//                    << " output: " << Ca_out << endl;
+                
             }
         }
     }
@@ -616,10 +679,63 @@ void SoftwareRendererImp::rasterize_image( float x0, float y0,
                                            Texture& tex ) {
   // Task 6: 
   // Implement image rasterization
+    
+    // scale up by sampling rate
+    x0 *= sample_rate; y0 *= sample_rate;
+    x1 *= sample_rate; y1 *= sample_rate;
+    
+    // check boundary
     x0 = max(0.0f,min(x0,(float)buff_w-1));
     y0 = max(0.0f,min(y0,(float)buff_h-1));
     x1 = max(0.0f,min(x1,(float)buff_w-1));
     y1 = max(0.0f,min(y1,(float)buff_h-1));
+    
+    // bound on screen
+    int xMax = floor(max(x0,x1));
+    int xMin = floor(min(x0,x1));
+    int yMax = floor(max(y0,y1));
+    int yMin = floor(min(y0,y1));
+    
+    float u,v;  float u_scale(0), v_scale(0);
+    int level = 0;
+    Color color;
+    char method = 'n'; // n: nearest; b: bilinear; t: trilinear
+            
+    for(int x = xMin; x <= xMax ; x++){
+        for(int y = yMin; y <= yMax; y++){
+            // (x0,y0) -> (0,0); (x1,y1) -> (1,1)
+            u = (x - x0) / (x1 - x0);
+            v = (y - y0) / (y1 - y0);
+            
+//            switch(method){
+//                case 'n':
+//                    color = sampler->sample_nearest(tex, u, v, level);
+//                case 'b':
+//                    color = sampler->sample_bilinear(tex, u, v, level);
+//                case 't':
+//                    color = sampler->sample_trilinear(tex, u, v, u_scale, v_scale);
+//            }
+            
+            if(method == 'n'){
+                color = sampler->sample_nearest(tex, u, v, level);
+            }else if(method == 'b'){
+                color = sampler->sample_bilinear(tex, u, v, level);
+            }else if(method == 't'){
+                color = sampler->sample_trilinear(tex, u, v, u_scale, v_scale);
+            }
+            
+            
+            // no alpha blending
+            sample_buffer[4 * (x + y * buff_w)    ] = (uint8_t) (color.r * 255);
+            sample_buffer[4 * (x + y * buff_w) + 1] = (uint8_t) (color.g * 255);
+            sample_buffer[4 * (x + y * buff_w) + 2] = (uint8_t) (color.b * 255);
+            sample_buffer[4 * (x + y * buff_w) + 3] = (uint8_t) (color.a * 255);
+            
+//            cout << color << endl;
+            
+        }
+    }
+    
     
 }
 
@@ -652,32 +768,39 @@ void SoftwareRendererImp::resolve( void ) {
             render_target[4 * (x + y * target_w)    ] = avgR / block_size;
             render_target[4 * (x + y * target_w) + 1] = avgG / block_size;
             render_target[4 * (x + y * target_w) + 2] = avgB / block_size;
-            render_target[4 * (x + y * target_w) + 3] = 255;
+            render_target[4 * (x + y * target_w) + 3] = avgA / block_size;
             
 //            avgR /= block_size;
 //            avgG /= block_size;
 //            avgB /= block_size;
 //            avgA /= block_size;
-//
+
+            
 //            // apply alpha blending
 //            // premultiply
-//            p_preR = avgR * avgA;
-//            p_preG = avgG * avgA;
-//            p_preB = avgB * avgA;
-//            buff_preR = (render_target[4 * (x + y * target_w)    ] / 255)
-//                                * (render_target[4 * (x + y * target_w) + 3] / 255);
-//            buff_preG = (render_target[4 * (x + y * target_w) + 1] / 255)
-//                                * (render_target[4 * (x + y * target_w) + 3] / 255);
-//            buff_preB = (render_target[4 * (x + y * target_w) + 2] / 255)
-//                                * (render_target[4 * (x + y * target_w) + 3] / 255);
-//            out_A = 1 - (1 - avgA) * (1 - render_target[4 * (x + y * target_w) + 3] / 255);
+//            float Er = avgR * avgA;
+//            float Eg = avgG * avgA;
+//            float Eb = avgB * avgA;
+//            float Cr = (sample_buffer[4 * (x + y * buff_w)    ] / 255)
+//                                * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+//            float Cg = (sample_buffer[4 * (x + y * buff_w) + 1] / 255)
+//                                * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+//            float Cb = (sample_buffer[4 * (x + y * buff_w) + 2] / 255)
+//                                * (sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+//            // composite alpha
+//            float Ca_out;
+//            if(sample_buffer[4 * (x + y * buff_w) + 3] < 255){
+//                Ca_out = 1 - (1 - avgA) * (1 - sample_buffer[4 * (x + y * buff_w) + 3] / 255);
+//            }else{
+//                Ca_out = avgA;
+//            }
+//
 //            // retrieve actual rgb values
-//            render_target[4 * (x + y * target_w)    ] = (uint8_t) (((1 - avgA) * buff_preR + p_preR) / out_A * 255);
-//            render_target[4 * (x + y * target_w) + 1] = (uint8_t) (((1 - avgA) * buff_preG + p_preG) / out_A * 255);
-//            render_target[4 * (x + y * target_w) + 2] = (uint8_t) (((1 - avgA) * buff_preB + p_preB) / out_A * 255);
-//            render_target[4 * (x + y * target_w) + 3] = (uint8_t) (out_A * 255);
+//            render_target[4 * (x + y * target_w)    ] = (uint8_t) (((1 - avgA) * Cr + Er) / Ca_out * 255);
+//            render_target[4 * (x + y * target_w) + 1] = (uint8_t) (((1 - avgA) * Cg + Eg) / Ca_out * 255);
+//            render_target[4 * (x + y * target_w) + 2] = (uint8_t) (((1 - avgA) * Cb + Eb) / Ca_out * 255);
+//            render_target[4 * (x + y * target_w) + 3] = (uint8_t) (Ca_out * 255);
 
-            //cout << avgA / block_size << endl;
         }
     }
     
