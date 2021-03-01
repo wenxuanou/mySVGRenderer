@@ -90,8 +90,8 @@ Color Sampler2DImp::sample_nearest(Texture& tex,
     // u,v in [0,1]
     int i = floor(u * w - 0.5);
     int j = floor(v * h - 0.5);
-    int s = u - (i + 0.5);
-    int t = v - (j + 0.5);
+    float s = u - (i + 0.5);
+    float t = v - (j + 0.5);
     
     if(s > 0.5 && i + 1 < w){
         i++;
@@ -105,13 +105,8 @@ Color Sampler2DImp::sample_nearest(Texture& tex,
                 (float)(tex.mipmap[level].texels[4 * (i + j * w) + 1] / 255.f),
                 (float)(tex.mipmap[level].texels[4 * (i + j * w) + 2] / 255.f),
                 (float)(tex.mipmap[level].texels[4 * (i + j * w) + 3] / 255.f));
-    
-//    cout << color << endl;
-    
+        
     return color;
-    
-  // return magenta for invalid level
-  //return Color(1,0,1,1);
 
 }
 
@@ -120,9 +115,43 @@ Color Sampler2DImp::sample_bilinear(Texture& tex,
                                     int level) {
   
   // Task 6: Implement bilinear filtering
-
+    
+    // scale according to texture map size
+    size_t w = tex.mipmap[level].width;
+    size_t h = tex.mipmap[level].height;
+    // u,v in [0,1]
+    int i = floor(u * w - 0.5);
+    int j = floor(v * h - 0.5);
+    float s = u * w - (i + 0.5);
+    float t = v * h - (j + 0.5);
+    
+    // retrieve color values in neightbourhood
+    Color c00((float)(tex.mipmap[level].texels[4 * (i + j * w)    ] / 255.f),
+              (float)(tex.mipmap[level].texels[4 * (i + j * w) + 1] / 255.f),
+              (float)(tex.mipmap[level].texels[4 * (i + j * w) + 2] / 255.f),
+              (float)(tex.mipmap[level].texels[4 * (i + j * w) + 3] / 255.f));
+    
+    Color c01((float)(tex.mipmap[level].texels[4 * (i + (j + 1) * w)    ] / 255.f),
+              (float)(tex.mipmap[level].texels[4 * (i + (j + 1) * w) + 1] / 255.f),
+              (float)(tex.mipmap[level].texels[4 * (i + (j + 1) * w) + 2] / 255.f),
+              (float)(tex.mipmap[level].texels[4 * (i + (j + 1) * w) + 3] / 255.f));
+    
+    Color c10((float)(tex.mipmap[level].texels[4 * ((i + 1) + j * w)    ] / 255.f),
+              (float)(tex.mipmap[level].texels[4 * ((i + 1) + j * w) + 1] / 255.f),
+              (float)(tex.mipmap[level].texels[4 * ((i + 1) + j * w) + 2] / 255.f),
+              (float)(tex.mipmap[level].texels[4 * ((i + 1) + j * w) + 3] / 255.f));
+    
+    Color c11((float)(tex.mipmap[level].texels[4 * ((i + 1) + (j + 1) * w)    ] / 255.f),
+              (float)(tex.mipmap[level].texels[4 * ((i + 1) + (j + 1) * w) + 1] / 255.f),
+              (float)(tex.mipmap[level].texels[4 * ((i + 1) + (j + 1) * w) + 2] / 255.f),
+              (float)(tex.mipmap[level].texels[4 * ((i + 1) + (j + 1) * w) + 3] / 255.f));
+    
+    Color c_bilinear = (1 - t) * ((1 - s) * c00 + s * c10) + t * ((1 - s) * c01 + s * c11);
+    
+    return c_bilinear;
+    
   // return magenta for invalid level
-  return Color(1,0,1,1);
+//  return Color(1,0,1,1);
 
 }
 

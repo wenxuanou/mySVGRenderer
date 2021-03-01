@@ -696,10 +696,10 @@ void SoftwareRendererImp::rasterize_image( float x0, float y0,
     int yMax = floor(max(y0,y1));
     int yMin = floor(min(y0,y1));
     
-    float u,v;  float u_scale(0), v_scale(0);
+    float u,v;  float u_scale(1), v_scale(1);
     int level = 0;
     Color color;
-    char method = 'n'; // n: nearest; b: bilinear; t: trilinear
+    char method = 'b'; // n: nearest; b: bilinear; t: trilinear
             
     for(int x = xMin; x <= xMax ; x++){
         for(int y = yMin; y <= yMax; y++){
