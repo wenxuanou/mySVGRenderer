@@ -48,6 +48,7 @@ void Sampler2DImp::generate_mips(Texture& tex, int startLevel) {
   numSubLevels = min(numSubLevels, kMaxMipLevels - startLevel - 1);
   tex.mipmap.resize(startLevel + numSubLevels + 1);
 
+  // allocate spaces
   int width  = baseWidth;
   int height = baseHeight;
   for (int i = 1; i <= numSubLevels; i++) {
@@ -61,20 +62,57 @@ void Sampler2DImp::generate_mips(Texture& tex, int startLevel) {
     level.width = width;
     level.height = height;
     level.texels = vector<unsigned char>(4 * width * height);
-
   }
+        
+    
+    // fill int sub levels
+    int blockSize = 2;
+    for(size_t level = 1; level < tex.mipmap.size(); ++level){
+        // scale down 2^level
+        int subMip_w = tex.mipmap[level].width;
+        int subMip_h = tex.mipmap[level].height;
 
-  // fill all 0 sub levels with interchanging colors (JUST AS A PLACEHOLDER)
-  Color colors[3] = { Color(1,0,0,1), Color(0,1,0,1), Color(0,0,1,1) };
-  for(size_t i = 1; i < tex.mipmap.size(); ++i) {
+        // fill in mipmap in the level
+        for(int w = 0; w < subMip_w; w++){
+            for(int h = 0; h < subMip_h; h++){
+                // get color values from upper level
+                Color avgC(0,0,0,0);
+                for(int ww = 0; ww < blockSize; ww++){
+                    for(int hh = 0; hh < blockSize; hh++){
+                        // get color values from upper level
+                        Color sampleC((float)(tex.mipmap[level - 1].texels[4 * ((w*blockSize+ww) + (h*blockSize+hh) * subMip_w * 2)    ] / 255.f),
+                                      (float)(tex.mipmap[level - 1].texels[4 * ((w*blockSize+ww) + (h*blockSize+hh) * subMip_w * 2) + 1] / 255.f),
+                                      (float)(tex.mipmap[level - 1].texels[4 * ((w*blockSize+ww) + (h*blockSize+hh) * subMip_w * 2) + 2] / 255.f),
+                                      (float)(tex.mipmap[level - 1].texels[4 * ((w*blockSize+ww) + (h*blockSize+hh) * subMip_w * 2) + 3] / 255.f));
+                        
+                        avgC += sampleC;
+                    }
+                }
+                
+                avgC = avgC * 0.25;
+                
+                tex.mipmap[level].texels[4 * (w + h * subMip_w)    ] = (uint8_t) (255.f * max( 0.0f, min( 1.0f, avgC.r)));
+                tex.mipmap[level].texels[4 * (w + h * subMip_w) + 1] = (uint8_t) (255.f * max( 0.0f, min( 1.0f, avgC.g)));
+                tex.mipmap[level].texels[4 * (w + h * subMip_w) + 2] = (uint8_t) (255.f * max( 0.0f, min( 1.0f, avgC.b)));
+                tex.mipmap[level].texels[4 * (w + h * subMip_w) + 3] = (uint8_t) (255.f * max( 0.0f, min( 1.0f, avgC.a)));
+            }
+        }
 
-    Color c = colors[i % 3];
-    MipLevel& mip = tex.mipmap[i];
-
-    for(size_t i = 0; i < 4 * mip.width * mip.height; i += 4) {
-      float_to_uint8( &mip.texels[i], &c.r );
     }
-  }
+    
+    
+    
+  // fill all 0 sub levels with interchanging colors (JUST AS A PLACEHOLDER)
+//  Color colors[3] = { Color(1,0,0,1), Color(0,1,0,1), Color(0,0,1,1) };
+//  for(size_t i = 1; i < tex.mipmap.size(); ++i) {
+//
+//    Color c = colors[i % 3];
+//    MipLevel& mip = tex.mipmap[i];
+//
+//    for(size_t i = 0; i < 4 * mip.width * mip.height; i += 4) {
+//      float_to_uint8( &mip.texels[i], &c.r );
+//    }
+//  }
 
 }
 
@@ -149,9 +187,6 @@ Color Sampler2DImp::sample_bilinear(Texture& tex,
     Color c_bilinear = (1 - t) * ((1 - s) * c00 + s * c10) + t * ((1 - s) * c01 + s * c11);
     
     return c_bilinear;
-    
-  // return magenta for invalid level
-//  return Color(1,0,1,1);
 
 }
 
@@ -161,8 +196,18 @@ Color Sampler2DImp::sample_trilinear(Texture& tex,
 
   // Task 7: Implement trilinear filtering
 
-  // return magenta for invalid level
-  return Color(1,0,1,1);
+    // scale u,v according to x,y
+    float level = max(9 + log2f(sqrt(max(u_scale * u_scale, v_scale * v_scale))), 0.0f);
+    //cout << "level: " << level << " total level: " << tex.mipmap.size() << endl;
+    // base level
+    Color c0 = sample_bilinear(tex, u, v, (int)floor(level));
+    // next level
+    Color c1 = sample_bilinear(tex, u/2, v/2, (int)ceil(level));
+    
+    return (1 - level) * c0 + level * c1;
+    
+//  // return magenta for invalid level
+//  return Color(1,0,1,1);
 
 }
 

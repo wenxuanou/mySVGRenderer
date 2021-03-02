@@ -14,15 +14,15 @@ Task 3:
 
 Task 4:
 
-    Implemented for triangles and points. Not quite support lines. 
+    Fully implemented. 
 
 Task 5:
 
-    Not implemented.
+    Fully implemented.
 
 Task 6:
 
-    Not implemented.
+    Fully implemented.
 
 Task 7:
 

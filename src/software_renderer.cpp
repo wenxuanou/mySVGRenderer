@@ -255,24 +255,6 @@ void SoftwareRendererImp::rasterize_point( float x, float y, Color color ) {
             sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 1] = (uint8_t) (color.g * 255);
             sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 2] = (uint8_t) (color.b * 255);
             sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 3] = (uint8_t) (color.a * 255);
-            
-            // apply alpha blending
-            // premultiply
-//            float p_preR = color.r * color.a;
-//            float p_preG = color.g * color.a;
-//            float p_preB = color.b * color.a;
-//            float buff_preR = (sample_buffer[4 * ((sx+i) + (sy+j) * buff_w)    ] / 255)
-//                                * (sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 3] / 255);
-//            float buff_preG = (sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 1] / 255)
-//                                * (sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 3] / 255);
-//            float buff_preB = (sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 2] / 255)
-//                                * (sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 3] / 255);
-//            float out_A = 1 - (1 - color.a) * (1 - sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 3] / 255);
-//            // retrieve actual rgb values
-//            sample_buffer[4 * ((sx+i) + (sy+j) * buff_w)    ] = (uint8_t) (((1 - color.a) * buff_preR + p_preR) / out_A * 255);
-//            sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 1] = (uint8_t) (((1 - color.a) * buff_preG + p_preG) / out_A * 255);
-//            sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 2] = (uint8_t) (((1 - color.a) * buff_preB + p_preB) / out_A * 255);
-//            sample_buffer[4 * ((sx+i) + (sy+j) * buff_w) + 3] = (uint8_t) (out_A * 255);
         }
     }
     
@@ -685,36 +667,36 @@ void SoftwareRendererImp::rasterize_image( float x0, float y0,
     x1 *= sample_rate; y1 *= sample_rate;
     
     // check boundary
-    x0 = max(0.0f,min(x0,(float)buff_w-1));
-    y0 = max(0.0f,min(y0,(float)buff_h-1));
-    x1 = max(0.0f,min(x1,(float)buff_w-1));
-    y1 = max(0.0f,min(y1,(float)buff_h-1));
+//    x0 = max(0.0f,min(x0,(float)buff_w-1));
+//    y0 = max(0.0f,min(y0,(float)buff_h-1));
+//    x1 = max(0.0f,min(x1,(float)buff_w-1));
+//    y1 = max(0.0f,min(y1,(float)buff_h-1));
     
     // bound on screen
-    int xMax = floor(max(x0,x1));
-    int xMin = floor(min(x0,x1));
-    int yMax = floor(max(y0,y1));
-    int yMin = floor(min(y0,y1));
+//    int xMax = floor(max(x0,x1));
+//    int xMin = floor(min(x0,x1));
+//    int yMax = floor(max(y0,y1));
+//    int yMin = floor(min(y0,y1));
     
-    float u,v;  float u_scale(1), v_scale(1);
-    int level = 0;
+    // avoid out of bound while preserve x and y
+    int xMax = floor(min(max(x0,x1), (float)(buff_w-1)));
+    int xMin = floor(max(min(x0,x1), 0.0f));
+    int yMax = floor(min(max(y0,y1), (float)(buff_h-1)));
+    int yMin = floor(max(min(y0,y1), 0.0f));
+    
+    
+    float u,v;
+    float u_scale = 1 / abs(x1 - x0);
+    float v_scale = 1 / abs(y1 - y0);
+    int level = 1;
     Color color;
-    char method = 'b'; // n: nearest; b: bilinear; t: trilinear
+    char method = 't'; // n: nearest; b: bilinear; t: trilinear
             
     for(int x = xMin; x <= xMax ; x++){
         for(int y = yMin; y <= yMax; y++){
             // (x0,y0) -> (0,0); (x1,y1) -> (1,1)
             u = (x - x0) / (x1 - x0);
             v = (y - y0) / (y1 - y0);
-            
-//            switch(method){
-//                case 'n':
-//                    color = sampler->sample_nearest(tex, u, v, level);
-//                case 'b':
-//                    color = sampler->sample_bilinear(tex, u, v, level);
-//                case 't':
-//                    color = sampler->sample_trilinear(tex, u, v, u_scale, v_scale);
-//            }
             
             if(method == 'n'){
                 color = sampler->sample_nearest(tex, u, v, level);
@@ -736,6 +718,7 @@ void SoftwareRendererImp::rasterize_image( float x0, float y0,
         }
     }
     
+//    cout << "level: " << max(9 + log2f(sqrt(max(u_scale * u_scale, v_scale * v_scale))), 0.0f) << endl;
     
 }
 
