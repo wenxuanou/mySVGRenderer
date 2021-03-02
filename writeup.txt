@@ -26,11 +26,11 @@ Task 6:
 
 Task 7:
 
-    Not implemented.
+    Implemented, but with aliasing when zoom out.
 
 Task 8:
 
-    Not implemented.
+    Working for the triangle example.
 
 Extra credit:
 

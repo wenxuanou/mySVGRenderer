@@ -99,21 +99,6 @@ void Sampler2DImp::generate_mips(Texture& tex, int startLevel) {
         }
 
     }
-    
-    
-    
-  // fill all 0 sub levels with interchanging colors (JUST AS A PLACEHOLDER)
-//  Color colors[3] = { Color(1,0,0,1), Color(0,1,0,1), Color(0,0,1,1) };
-//  for(size_t i = 1; i < tex.mipmap.size(); ++i) {
-//
-//    Color c = colors[i % 3];
-//    MipLevel& mip = tex.mipmap[i];
-//
-//    for(size_t i = 0; i < 4 * mip.width * mip.height; i += 4) {
-//      float_to_uint8( &mip.texels[i], &c.r );
-//    }
-//  }
-
 }
 
 Color Sampler2DImp::sample_nearest(Texture& tex, 
@@ -202,7 +187,7 @@ Color Sampler2DImp::sample_trilinear(Texture& tex,
     // base level
     Color c0 = sample_bilinear(tex, u, v, (int)floor(level));
     // next level
-    Color c1 = sample_bilinear(tex, u/2, v/2, (int)ceil(level));
+    Color c1 = sample_bilinear(tex, u, v, (int)min(floor(level+1),9.0f));
     
     return (1 - level) * c0 + level * c1;
     

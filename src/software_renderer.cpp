@@ -688,7 +688,7 @@ void SoftwareRendererImp::rasterize_image( float x0, float y0,
     float u,v;
     float u_scale = 1 / abs(x1 - x0);
     float v_scale = 1 / abs(y1 - y0);
-    int level = 1;
+    int level = 0;
     Color color;
     char method = 't'; // n: nearest; b: bilinear; t: trilinear
             
